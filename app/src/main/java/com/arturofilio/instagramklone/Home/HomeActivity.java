@@ -1,16 +1,13 @@
 package com.arturofilio.instagramklone.Home;
 
 import android.content.Context;
-import android.support.design.widget.BottomNavigationView;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.arturofilio.instagramklone.R;
 import com.arturofilio.instagramklone.Utils.BottomNavigationViewHelper;

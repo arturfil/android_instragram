@@ -1,4 +1,4 @@
-package com.arturofilio.instagramklone.Home;
+package com.arturofilio.instagramklone.Utils;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,7 +14,7 @@ import java.util.List;
 /**Class for storing fragments for tabs
 */
 
-public class SectionsPagerAdapter extends FragmentPagerAdapter {
+public class  SectionsPagerAdapter extends FragmentPagerAdapter {
    private static final String TAG = "SectionsPagerAdapter";
 
    private final List<Fragment> mFragmentList = new ArrayList<>();

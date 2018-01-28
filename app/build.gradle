@@ -43,4 +43,13 @@ dependencies {
     //Circle ImageView
     compile 'de.hdodenhof:circleimageview:2.2.0'
 
+    //Universal Image Loader
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+
+    //firebase authentication
+    compile 'com.google.firebase:firebase-auth:10.2.6'
 }
+
+//Firebase
+apply plugin: 'com.google.gms.google-services'
+

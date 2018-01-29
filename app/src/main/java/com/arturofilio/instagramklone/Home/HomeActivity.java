@@ -92,14 +92,15 @@ public class HomeActivity extends AppCompatActivity {
 
     //checks to see if the @param 'user is logged in
 
-//    private void checkCurrentUser(FirebaseUser user) {
-//        Log.d(TAG, "checkCurrentUser: cheking if user is logged in.");
-//
-//        if (user == null) {
-//            Intent intent = new Intent(mContext, LoginActivity.class);
-//            startActivity(intent);
-//        }
-//    }
+    private void checkCurrentUser(FirebaseUser user) {
+        Log.d(TAG, "checkCurrentUser: cheking if user is logged in.");
+
+        if (user == null) {
+            Intent intent = new Intent(mContext, LoginActivity.class);
+            startActivity(intent);
+        }
+    }
+
     // Set up the Firebase auth object
 
     private void setupFirebaseAuth() {
@@ -111,7 +112,7 @@ public class HomeActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 //check if the user is logged in
-//                checkCurrentUser(user);
+                checkCurrentUser(user);
 
                 if (user != null ) {
                     // user is signed in
@@ -129,6 +130,7 @@ public class HomeActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        checkCurrentUser(mAuth.getCurrentUser());
     }
 
     @Override

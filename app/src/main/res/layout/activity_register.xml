@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<selector
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -90,8 +90,9 @@
         android:text="Please wait..."
         android:textColor="@color/black"
         android:textSize="20sp"
-        android:layout_marginBottom="@+id/progressBar"
+        android:layout_alignBottom="@+id/progressBar"
         android:layout_alignRight="@+id/progressBar"
-        android:layout_alignLeft="@+id/progressBar"/>
+        android:layout_alignLeft="@+id/progressBar"
+        android:id="@+id/loadingPleaseWait"/>
 
-</RelativeLayout>
+</selector>

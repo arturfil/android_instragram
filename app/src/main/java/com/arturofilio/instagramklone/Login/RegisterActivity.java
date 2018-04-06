@@ -15,8 +15,15 @@ import android.widget.Toast;
 
 import com.arturofilio.instagramklone.R;
 import com.arturofilio.instagramklone.Utils.FirebaseMethods;
+import com.arturofilio.instagramklone.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Created by arturofiliovilla on 1/28/18.
@@ -37,6 +44,10 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseMethods firebaseMethods;
+    private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference myRef;
+
+    private String append = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         initWidgets();
         setupFirebaseAuth();
+        init();
     }
 
     private void init() {
@@ -107,11 +119,56 @@ public class RegisterActivity extends AppCompatActivity {
 
     //-----------------------------------Firebase------------------------------
 
+    /**
+     * Check if @param username already exists in the database
+     * @param username
+     */
+    private void checkIfUsernameExists(final String username) {
+        Log.d(TAG, "checkIfUsernameExists: Checking if " + username + " already exists.");
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference
+                .child(getString(R.string.dbname_users))
+                .orderByChild(getString(R.string.field_username))
+                .equalTo(username);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+             @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot singleSnapshot: dataSnapshot.getChildren()) {
+                    if (singleSnapshot.exists()) {
+                        Log.d(TAG, "checkIfUsernameExists: FOUND A MATCH: " + singleSnapshot.getValue(User.class).getUsername());
+                        append = myRef.push().getKey().substring(3,7);
+                        Log.d(TAG, "onDataChange: username already exists. Appending random strin to name: " + append);
+                    }
+                }
+
+                 String mUsername = "";
+                mUsername = username + append;
+
+                 //add new user to the database
+                 firebaseMethods.addNewUser(email, username, "", "", "");
+
+                 Toast.makeText(mContext, "Signup succesful. Sending verification email.", Toast.LENGTH_SHORT).show();
+
+                 mAuth.signOut();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     // Set up the Firebase auth object
 
     private void setupFirebaseAuth() {
         Log.d(TAG, "setupFirebaseAuth: starting");
         mAuth = FirebaseAuth.getInstance();
+        mFirebaseDatabase = FirebaseDatabase.getInstance();
+        myRef = mFirebaseDatabase.getReference();
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -120,6 +177,21 @@ public class RegisterActivity extends AppCompatActivity {
                 if (user != null ) {
                     // user is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+
+                    myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            checkIfUsernameExists(username);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    finish();
+
                 } else {
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");

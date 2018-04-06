@@ -48,6 +48,12 @@ dependencies {
 
     //firebase authentication
     compile 'com.google.firebase:firebase-auth:10.2.6'
+
+    //firebase databse
+    compile 'com.google.firebase:firebase-database:10.2.6'
+
+    //firebase storage
+    compile 'com.google.firebase:firebase-storage:10.2.6'
 }
 
 //Firebase

@@ -3,6 +3,9 @@
     package="com.arturofilio.instagramklone">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -25,6 +28,7 @@
         <activity android:name=".Profile.AccountsSettingsActivity"></activity>
         <activity android:name=".Login.RegisterActivity"></activity>
         <activity android:name=".Login.LoginActivity"></activity>
+        <activity android:name=".Share.NextActivity"/>
     </application>
 
 </manifest>

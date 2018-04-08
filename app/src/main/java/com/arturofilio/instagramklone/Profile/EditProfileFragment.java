@@ -280,6 +280,7 @@ public class EditProfileFragment extends android.support.v4.app.Fragment impleme
                 Intent intent = new Intent(getActivity(), ShareActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); //26843565
                 getActivity().startActivity(intent);
+                getActivity().finish();
             }
         });
     }

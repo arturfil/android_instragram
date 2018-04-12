@@ -76,12 +76,19 @@ public class PhotoFragment extends Fragment {
             Bitmap bitmap;
             bitmap = (Bitmap) data.getExtras().get("data");
             if(isRootTaks()) {
-
+                try{
+                    Log.d(TAG, "onActivityResult: received new bitmap form camera: " + bitmap);
+                    Intent intent = new Intent(getActivity(), NextActivity.class);
+                    intent.putExtra(getString(R.string.selected_bitmap), bitmap );
+                    startActivity(intent);
+                } catch (NullPointerException e){
+                    Log.d(TAG, "onActivityResult: NullPointerException: " + e.getMessage());
+                }
             } else {
                 try{
                     Log.d(TAG, "onActivityResult: received new bitmap form camera: " + bitmap);
                     Intent intent = new Intent(getActivity(), AccountSettingsActivity.class);
-                    intent.putExtra(getString(R.string.selected_bitmap), bitmap);
+                    intent.putExtra(getString(R.string.selected_bitmap), bitmap );
                     intent.putExtra(getString(R.string.return_to_fragment), getString(R.string.edit_profile_fragment));
                     startActivity(intent);
                     getActivity().finish();

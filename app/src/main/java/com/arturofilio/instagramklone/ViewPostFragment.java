@@ -22,6 +22,13 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 /**
  * Created by arturofiliovilla on 4/11/18.
  */
@@ -43,7 +50,7 @@ public class ViewPostFragment extends Fragment {
 
     //vars
     private Photo mPhoto;
-    private int mActivityNumber = 0 ;
+    private int mActivityNumber = 0;
 
     @Nullable
     @Override
@@ -70,7 +77,41 @@ public class ViewPostFragment extends Fragment {
         }
 
         setupBottomNavigationView();
+        setupWidgets();
         return view;
+    }
+
+    private void setupWidgets() {
+        String timestampDiff = getTimestampDifference();
+        if(!timestampDiff.equals("0")){
+            mTimestamp.setText(timestampDiff + "DAYS AGO");
+        } else {
+            mTimestamp.setText("TODAY");
+        }
+    }
+
+    /**
+     * Returns a string representing the number of days ago the post was made
+     * @return
+     */
+    private String getTimestampDifference() {
+        Log.d(TAG, "getTimestampDifference: getting timestamp differnce");
+        String difference = "";
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("US/Pacific"));
+        Date today = c.getTime();
+        sdf.format(today);
+        Date timestamp;
+        final String phototimestamp = mPhoto.getDate_created();
+        try {
+            timestamp = sdf.parse(phototimestamp);
+            difference = String.valueOf(Math.round(((today.getTime() - timestamp.getTime()) / 1000 / 60 / 60 / 24 )));
+        } catch (ParseException e) {
+            Log.e(TAG, "getTimestampDifference: ParseException" + e.getMessage() );
+            difference = "0";
+        }
+        return difference;
     }
 
     /**

@@ -3,8 +3,6 @@ package com.arturofilio.instagramklone.Profile;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import com.arturofilio.instagramklone.Profile.ProfileFragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.arturofilio.instagramklone.R;
-import com.arturofilio.instagramklone.ViewPostFragment;
+import com.arturofilio.instagramklone.Utils.ViewPostFragment;
 import com.arturofilio.instagramklone.models.Photo;
 
 /**

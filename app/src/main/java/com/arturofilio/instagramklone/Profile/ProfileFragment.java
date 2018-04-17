@@ -155,13 +155,14 @@ public class ProfileFragment extends Fragment {
                     photo.setDate_created(objectMap.get(getString(R.string.field_date_created)).toString());
                     photo.setImage_path(objectMap.get(getString(R.string.field_image_path)).toString());
 
-                    List<Like> likeslist = new ArrayList<Like>();
-                    for (DataSnapshot dSnapshot : singleSnapshot.getChildren()) {
+                    List<Like> likesList = new ArrayList<Like>();
+                    for (DataSnapshot dSnapshot : singleSnapshot
+                            .child(getString(R.string.field_likes)).getChildren()) {
                         Like like = new Like();
                         like.setUser_id(dSnapshot.getValue(Like.class).getUser_id());
-                        likeslist.add(like);
+                        likesList.add(like);
                     }
-                    photo.setLikes(likeslist);
+                    photo.setLikes(likesList);
                     photos.add(photo);
 
                 }

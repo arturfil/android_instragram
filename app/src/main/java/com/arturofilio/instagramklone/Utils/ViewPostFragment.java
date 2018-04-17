@@ -24,7 +24,9 @@ import com.arturofilio.instagramklone.Utils.FirebaseMethods;
 import com.arturofilio.instagramklone.Utils.GridImageAdapter;
 import com.arturofilio.instagramklone.Utils.SquareImageView;
 import com.arturofilio.instagramklone.Utils.UniversalImageLoader;
+import com.arturofilio.instagramklone.models.Like;
 import com.arturofilio.instagramklone.models.Photo;
+import com.arturofilio.instagramklone.models.User;
 import com.arturofilio.instagramklone.models.UserAccountSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -69,7 +71,7 @@ public class ViewPostFragment extends Fragment {
     //widgets
     private SquareImageView mPostImage;
     private BottomNavigationViewEx bottomNavigationView;
-    private TextView mBackLabel, mCaption, mUsername, mTimestamp;
+    private TextView mBackLabel, mCaption, mUsername, mTimestamp, mLikes;
     private ImageView mBackArrow, mEllipses, mHeartRed, mHeartWhite, mProfileImage;
 
     //vars
@@ -80,6 +82,9 @@ public class ViewPostFragment extends Fragment {
     private UserAccountSettings mUserAccountSettings;
     private GestureDetector mGestureDetector;
     private Heart mHeart;
+    private Boolean mLikedByCurrentUser;
+    private StringBuilder mUsers;
+    private String mLikesString = "";
 
     @Nullable
     @Override
@@ -96,9 +101,8 @@ public class ViewPostFragment extends Fragment {
         mHeartRed = (ImageView) view.findViewById(R.id.image_heart_red);
         mHeartWhite = (ImageView) view.findViewById(R.id.image_heart);
         mProfileImage = (ImageView) view.findViewById(R.id.profile_photo);
+        mLikes = (TextView) view.findViewById(R.id.image_likes);
 
-        mHeartRed.setVisibility(View.GONE);
-        mHeartWhite.setVisibility(View.VISIBLE);
         mHeart = new Heart(mHeartWhite, mHeartRed);
         mGestureDetector = new GestureDetector(getActivity(), new GestureListener());
 
@@ -106,33 +110,95 @@ public class ViewPostFragment extends Fragment {
             mPhoto = getPhotoFromBundle();
             UniversalImageLoader.setImage(mPhoto.getImage_path(), mPostImage, null, "");
             mActivityNumber = getActivityNumFromBundle();
+            getPhotoDetails();
+            getLikedStrings();
         } catch (NullPointerException e) {
             Log.e(TAG, "onCreateView: NullPointerException: " + e.getMessage() );
         }
 
         setupFirebaseAuth();
         setupBottomNavigationView();
-        getPhotoDetails();
-        //setupWidgets();
 
-        testToggle();
         return view;
     }
 
-    private void testToggle(){
-        mHeartRed.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "onTouch: red heart touch detected");
-                return mGestureDetector.onTouchEvent(event);
-            }
-        });
+    private void getLikedStrings() {
+        Log.d(TAG, "getLikedStrings: getting likes string");
 
-        mHeartWhite.setOnTouchListener(new View.OnTouchListener() {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference
+                .child(getString(R.string.dbname_photos))
+                .orderByChild(mPhoto.getPhoto_id())
+                .equalTo(getString(R.string.field_likes));
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "onTouch: white heart touch detected");
-                return mGestureDetector.onTouchEvent(event);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mUsers = new StringBuilder();
+                for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+                    Query query = reference
+                            .child(getString(R.string.dbname_users))
+                            .orderByChild(getString(R.string.field_user_id))
+                            .equalTo(singleSnapshot.getValue(Like.class).getUser_id());
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                                Log.d(TAG, "onDataChange: found like: " + singleSnapshot
+                                        .getValue(User.class).getUsername());
+                                mUsers.append(singleSnapshot.getValue(User.class).getUsername());
+                                mUsers.append(",");
+                            }
+
+                            String[] splitUsers = mUsers.toString().split(",");
+
+                            if(mUsers.toString().contains(mUserAccountSettings.getUsername())){
+                                mLikedByCurrentUser = true;
+                            } else {
+                                mLikedByCurrentUser = false;
+                            }
+
+                            int lenght = splitUsers.length;
+                            if (lenght == 1){
+                                mLikesString = "Liked by: " + splitUsers[0];
+                            } else if (lenght == 2) {
+                                mLikesString = "Liked by: " + splitUsers[0]
+                                + " and " + splitUsers[1];
+                            } else if (lenght == 3) {
+                                mLikesString = "Liked by: " + splitUsers[0]
+                                        + ", " + splitUsers[1]
+                                        + " and " + splitUsers[2];
+                            } else if (lenght == 4) {
+                                mLikesString = "Liked by: " + splitUsers[0]
+                                        + ", " + splitUsers[1]
+                                        + ", " + splitUsers[2]
+                                        + " and " + splitUsers[3];
+                            } else if (lenght > 5) {
+                                mLikesString = "Liked by: " + splitUsers[0]
+                                        + ", " + splitUsers[1]
+                                        + ", " + splitUsers[2]
+                                        + ", " + splitUsers[3]
+                                        + " and " + (splitUsers.length - 3) + " others";
+                            }
+                            setupWidgets();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+                if(!dataSnapshot.exists()){
+                    mLikesString = "";
+                    mLikedByCurrentUser = false;
+                    setupWidgets();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }
@@ -146,9 +212,82 @@ public class ViewPostFragment extends Fragment {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             Log.d(TAG, "onDoubleTap: double tap detected");
-            mHeart.toggleLike();
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+            Query query = reference
+                    .child(getString(R.string.dbname_photos))
+                    .orderByChild(mPhoto.getPhoto_id())
+                    .equalTo(getString(R.string.field_likes));
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+
+                        String keyID = singleSnapshot.getKey();
+
+                        //case1: the user has already liked the photo
+                        if(mLikedByCurrentUser &&  singleSnapshot.getValue(Like.class).getUser_id()
+                                .equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+
+                            myRef.child(getString(R.string.dbname_photos))
+                                    .child(mPhoto.getPhoto_id())
+                                    .child(getString(R.string.field_likes))
+                                    .child(keyID)
+                                    .removeValue();
+
+                            myRef.child(getString(R.string.dbname_user_photos))
+                                    .child(mPhoto.getPhoto_id())
+                                    .child(getString(R.string.field_likes))
+                                    .child(keyID)
+                                    .removeValue();
+
+                            mHeart.toggleLike();;
+                            getLikedStrings();
+                        }
+
+                        //case2: the user hasn't liked the photo yet.
+                        else if (!mLikedByCurrentUser) {
+                            //add new like
+                            addNewLike();
+                            break;
+                        }
+                    }
+                    if(!dataSnapshot.exists()) {
+                        //add new Like
+                        addNewLike();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
             return true;
         }
+    }
+
+    private void addNewLike() {
+        Log.d(TAG, "addNewLike: adding new like");
+
+        String newLikeID = myRef.push().getKey();
+        Like like = new Like();
+        like.setUser_id(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        myRef.child(getString(R.string.dbname_photos))
+                .child(mPhoto.getPhoto_id())
+                .child(getString(R.string.field_likes))
+                .child(newLikeID)
+                .setValue(like);
+
+        myRef.child(getString(R.string.dbname_user_photos))
+                .child(mPhoto.getPhoto_id())
+                .child(getString(R.string.field_likes))
+                .child(newLikeID)
+                .setValue(like);
+
+        mHeart.toggleLike();
+        getLikedStrings();
     }
 
     private void getPhotoDetails() {
@@ -163,7 +302,7 @@ public class ViewPostFragment extends Fragment {
                 for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
                     mUserAccountSettings = singleSnapshot.getValue(UserAccountSettings.class);
                 }
-                setupWidgets();
+                //setupWidgets();
             }
 
             @Override
@@ -182,6 +321,31 @@ public class ViewPostFragment extends Fragment {
         }
         UniversalImageLoader.setImage(mUserAccountSettings.getProfile_photo(), mProfileImage, null,"");
         mUsername.setText(mUserAccountSettings.getUsername());
+        mLikes.setText(mLikesString);
+
+        if(mLikedByCurrentUser) {
+            mHeartWhite.setVisibility(View.GONE);
+            mHeartRed.setVisibility((View.VISIBLE));
+            mHeartRed.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.d(TAG, "onTouch: red heart touch detected");
+                    return mGestureDetector.onTouchEvent(event);
+                }
+            });
+
+        } else {
+            mHeartWhite.setVisibility(View.VISIBLE);
+            mHeartRed.setVisibility((View.GONE));
+            mHeartWhite.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.d(TAG, "onTouch: white heart touch detected");
+                    return mGestureDetector.onTouchEvent(event);
+                }
+            });
+        }
+
     }
 
     /**

@@ -80,6 +80,7 @@
                 android:textStyle="bold"
                 android:textColor="@color/grey"
                 android:textSize="14sp"
+                android:id="@+id/comment_reply"
                 android:layout_marginTop="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_below="@+id/comment"

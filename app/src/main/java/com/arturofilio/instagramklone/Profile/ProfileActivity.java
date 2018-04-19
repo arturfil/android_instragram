@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.arturofilio.instagramklone.R;
+import com.arturofilio.instagramklone.Utils.ViewCommentsFragment;
 import com.arturofilio.instagramklone.Utils.ViewPostFragment;
 import com.arturofilio.instagramklone.models.Photo;
 
@@ -17,9 +18,26 @@ import com.arturofilio.instagramklone.models.Photo;
  * Created by arturofiliovilla on 1/17/18.
  */
 
-public class ProfileActivity extends AppCompatActivity implements ProfileFragment.OnGridImageSelectedListener {
+public class ProfileActivity extends AppCompatActivity implements
+        ProfileFragment.OnGridImageSelectedListener,
+        ViewPostFragment.OnCommentThreadSelectedListener {
 
     private static final String TAG = "ProfileActivity";
+
+    @Override
+    public void onCommentThreadListener(Photo photo) {
+        Log.d(TAG, "onCommentThreadListener: selected a comment thread");
+
+        ViewCommentsFragment fragment = new ViewCommentsFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.view_comments_fragment));
+        transaction.commit();
+
+    }
 
     @Override
     public void onGridImageSelected(Photo photo, int activityNumber) {
@@ -63,7 +81,5 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
         transaction.commit();
 
     }
-
-
 
 }

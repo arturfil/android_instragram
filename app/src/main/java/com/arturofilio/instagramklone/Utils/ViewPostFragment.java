@@ -1,5 +1,6 @@
 package com.arturofilio.instagramklone.Utils;
 
+import android.content.Context;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -54,6 +55,11 @@ import java.util.TimeZone;
 
 public class ViewPostFragment extends Fragment {
 
+    public interface OnCommentThreadSelectedListener{
+        void onCommentThreadListener(Photo photo);
+    }
+    OnCommentThreadSelectedListener mOnCommentThreadSelectedListener;
+
     private static final String TAG = "ViewPostFragment";
 
     public ViewPostFragment() {
@@ -72,7 +78,8 @@ public class ViewPostFragment extends Fragment {
     private SquareImageView mPostImage;
     private BottomNavigationViewEx bottomNavigationView;
     private TextView mBackLabel, mCaption, mUsername, mTimestamp, mLikes;
-    private ImageView mBackArrow, mEllipses, mHeartRed, mHeartWhite, mProfileImage;
+    private ImageView mBackArrow, mEllipses, mHeartRed, mHeartWhite, mProfileImage, mComment;
+
 
     //vars
     private Photo mPhoto;
@@ -102,6 +109,7 @@ public class ViewPostFragment extends Fragment {
         mHeartWhite = (ImageView) view.findViewById(R.id.image_heart);
         mProfileImage = (ImageView) view.findViewById(R.id.profile_photo);
         mLikes = (TextView) view.findViewById(R.id.image_likes);
+        mComment = (ImageView) view.findViewById(R.id.speech_bubble);
 
         mHeart = new Heart(mHeartWhite, mHeartRed);
         mGestureDetector = new GestureDetector(getActivity(), new GestureListener());
@@ -120,6 +128,16 @@ public class ViewPostFragment extends Fragment {
         setupBottomNavigationView();
 
         return view;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try{
+            mOnCommentThreadSelectedListener = (OnCommentThreadSelectedListener) getActivity();
+        } catch (ClassCastException e) {
+            Log.e(TAG, "onAttach: ClassCastException" + e.getMessage() );
+        }
     }
 
     private void getLikedStrings() {
@@ -325,6 +343,22 @@ public class ViewPostFragment extends Fragment {
         mLikes.setText(mLikesString);
         mCaption.setText(mPhoto.getCaption());
 
+        mBackArrow.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: navigating back");
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
+        mComment.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: navigating back");
+                mOnCommentThreadSelectedListener.onCommentThreadListener(mPhoto);
+
+            }
+        });
 
         if(mLikedByCurrentUser) {
             mHeartWhite.setVisibility(View.GONE);

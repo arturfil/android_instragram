@@ -30,6 +30,7 @@ public class ProfileActivity extends AppCompatActivity implements
 
         ViewCommentsFragment fragment = new ViewCommentsFragment();
         Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.photo), photo);
         fragment.setArguments(args);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

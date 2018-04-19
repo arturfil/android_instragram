@@ -76,6 +76,7 @@ public class CommentListAdapter extends ArrayAdapter<Comment> {
             holder.timestamp = (TextView) convertView.findViewById(R.id.comment_time_posted);
             holder.reply = (TextView) convertView.findViewById(R.id.comment_reply);
             holder.like = (ImageView) convertView.findViewById(R.id.comment_like);
+            holder.likes = (TextView) convertView.findViewById(R.id.comment_likes);
             holder.profileImage = (CircleImageView) convertView.findViewById(R.id.comment_profile_image);
 
             convertView.setTag(holder);
@@ -119,10 +120,16 @@ public class CommentListAdapter extends ArrayAdapter<Comment> {
             }
         });
 
-        if(position == 0) {
-            holder.like.setVisibility(View.GONE);
-            holder.likes.setVisibility(View.GONE);
-            holder.reply.setVisibility(View.GONE);
+        try {
+
+            if(position == 0) {
+                holder.like.setVisibility(View.GONE);
+                holder.likes.setVisibility(View.GONE);
+                holder.reply.setVisibility(View.GONE);
+            }
+
+        } catch (NullPointerException e) {
+            Log.e(TAG, "getView: NullPointerException: " + e.getMessage());
         }
 
         return convertView;

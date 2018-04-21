@@ -1,5 +1,7 @@
 package com.arturofilio.instagramklone.models;
 
+import java.util.List;
+
 /**
  * Created by arturofiliovilla on 4/18/18.
  */
@@ -8,16 +10,26 @@ public class Comment {
 
    private String comment;
    private String user_id;
+   private List<Like> likes;
    private String date_created;
 
     public Comment() {
 
     }
 
-    public Comment(String comment, String user_id, String date_created) {
+    public Comment(String comment, String user_id, List<Like> likes, String date_created) {
         this.comment = comment;
         this.user_id = user_id;
+        this.likes = likes;
         this.date_created = date_created;
+    }
+
+    public List<Like> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(List<Like> likes) {
+        this.likes = likes;
     }
 
     public String getComment() {

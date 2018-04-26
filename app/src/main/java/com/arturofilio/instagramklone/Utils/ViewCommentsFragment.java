@@ -203,6 +203,18 @@ public class ViewCommentsFragment extends Fragment {
             }
         };
 
+        if(mPhoto.getComments().size() == 0) {
+            mComments.clear();
+            Comment firstComment = new Comment();
+            firstComment.setComment(mPhoto.getCaption());
+            firstComment.setUser_id(mPhoto.getUser_id());
+            firstComment.setDate_created(mPhoto.getDate_created());
+
+            mComments.add(firstComment);
+            mPhoto.setComments(mComments);
+            setupWidgets();
+        }
+
         myRef.child(getString(R.string.dbname_photos))
                 .child(mPhoto.getPhoto_id())
         .child(getString(R.string.field_comments))

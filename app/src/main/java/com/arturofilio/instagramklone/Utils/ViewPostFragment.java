@@ -25,6 +25,7 @@ import com.arturofilio.instagramklone.Utils.FirebaseMethods;
 import com.arturofilio.instagramklone.Utils.GridImageAdapter;
 import com.arturofilio.instagramklone.Utils.SquareImageView;
 import com.arturofilio.instagramklone.Utils.UniversalImageLoader;
+import com.arturofilio.instagramklone.models.Comment;
 import com.arturofilio.instagramklone.models.Like;
 import com.arturofilio.instagramklone.models.Photo;
 import com.arturofilio.instagramklone.models.User;
@@ -46,7 +47,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -55,12 +59,13 @@ import java.util.TimeZone;
 
 public class ViewPostFragment extends Fragment {
 
+    private static final String TAG = "ViewPostFragment";
+
     public interface OnCommentThreadSelectedListener{
         void onCommentThreadListener(Photo photo);
     }
     OnCommentThreadSelectedListener mOnCommentThreadSelectedListener;
 
-    private static final String TAG = "ViewPostFragment";
 
     public ViewPostFragment() {
         super();
@@ -77,7 +82,7 @@ public class ViewPostFragment extends Fragment {
     //widgets
     private SquareImageView mPostImage;
     private BottomNavigationViewEx bottomNavigationView;
-    private TextView mBackLabel, mCaption, mUsername, mTimestamp, mLikes;
+    private TextView mBackLabel, mCaption, mUsername, mTimestamp, mLikes, mComments;
     private ImageView mBackArrow, mEllipses, mHeartRed, mHeartWhite, mProfileImage, mComment;
 
 
@@ -110,16 +115,59 @@ public class ViewPostFragment extends Fragment {
         mProfileImage = (ImageView) view.findViewById(R.id.profile_photo);
         mLikes = (TextView) view.findViewById(R.id.image_likes);
         mComment = (ImageView) view.findViewById(R.id.speech_bubble);
+        mComments = (TextView) view.findViewById(R.id.image_comments_link);
 
         mHeart = new Heart(mHeartWhite, mHeartRed);
         mGestureDetector = new GestureDetector(getActivity(), new GestureListener());
 
         try {
-            mPhoto = getPhotoFromBundle();
-            UniversalImageLoader.setImage(mPhoto.getImage_path(), mPostImage, null, "");
+            //mPhoto = getPhotoFromBundle();
+            UniversalImageLoader.setImage(getPhotoFromBundle().getImage_path(), mPostImage, null, "");
             mActivityNumber = getActivityNumFromBundle();
-            getPhotoDetails();
-            getLikedStrings();
+            String photo_id = getPhotoFromBundle().getPhoto_id();
+
+            Query query = FirebaseDatabase.getInstance().getReference()
+                    .child(getString(R.string.dbname_photos))
+                    .orderByChild(getString(R.string.field_photo_id))
+                    .equalTo(photo_id);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
+                        Photo newPhoto = new Photo();
+                        Map<String, Object> objectMap = (HashMap<String, Object>) singleSnapshot.getValue();
+
+                        newPhoto.setCaption(objectMap.get(getString(R.string.field_caption)).toString());
+                        newPhoto.setTags(objectMap.get(getString(R.string.field_tags)).toString());
+                        newPhoto.setPhoto_id(objectMap.get(getString(R.string.field_photo_id)).toString());
+                        newPhoto.setUser_id(objectMap.get(getString(R.string.field_user_id)).toString());
+                        newPhoto.setDate_created(objectMap.get(getString(R.string.field_date_created)).toString());
+                        newPhoto.setImage_path(objectMap.get(getString(R.string.field_image_path)).toString());
+
+                        List<Comment> commentsList = new ArrayList<Comment>();
+                        for(DataSnapshot dSnapshot : singleSnapshot
+                                .child(getString(R.string.field_comments)).getChildren()) {
+                            Comment comment = new Comment();
+                            comment.setUser_id(dSnapshot.getValue(Comment.class).getUser_id());
+                            comment.setComment(dSnapshot.getValue(Comment.class).getComment());
+                            comment.setDate_created(dSnapshot.getValue(Comment.class).getDate_created());
+                            commentsList.add(comment);
+                        }
+                        newPhoto.setComments(commentsList);
+
+                        mPhoto = newPhoto;
+
+                        getPhotoDetails();
+                        getLikedStrings();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         } catch (NullPointerException e) {
             Log.e(TAG, "onCreateView: NullPointerException: " + e.getMessage() );
         }
@@ -343,6 +391,21 @@ public class ViewPostFragment extends Fragment {
         mUsername.setText(mUserAccountSettings.getUsername());
         mLikes.setText(mLikesString);
         mCaption.setText(mPhoto.getCaption());
+
+        if(mPhoto.getComments().size() > 0) {
+            mComments.setText("View all " + mPhoto.getComments().size() + " comments");
+        } else {
+            mComments.setText("");
+        }
+
+        mComments.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: navigating to comments thread");
+
+                mOnCommentThreadSelectedListener.onCommentThreadListener(mPhoto);
+            }
+        });
 
         mBackArrow.setOnClickListener(new View.OnClickListener(){
             @Override

@@ -94,8 +94,8 @@
 
         <TextView
             android:id="@+id/textEditProfile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="156dp"
+            android:layout_height="18dp"
             android:layout_margin="8dp"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"

@@ -78,10 +78,13 @@ public class ViewProfileFragment extends Fragment {
     private ImageView profileMenu;
     private BottomNavigationViewEx bottomNavigationView;
     private TextView editProfile;
-
-    private User mUser;
-
     private Context mContext;
+
+    //vars
+    private User mUser;
+    private int mFollowersCount = 0;
+    private int mFollowingCount = 0;
+    private int mPostCount = 0;
 
     @Nullable
     @Override
@@ -120,6 +123,9 @@ public class ViewProfileFragment extends Fragment {
         setupFirebaseAuth();
 
         isFollowing();
+        getFollowingCount();
+        getFollowersCount();
+        getPostsCount();
 
         mFollow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -285,6 +291,76 @@ public class ViewProfileFragment extends Fragment {
             }
         });
     }
+
+    private void getFollowersCount() {
+       mFollowersCount = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child(getString(R.string.dbname_followers))
+                .child(mUser.getUser_id());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found followers:" + singleSnapshot.getValue());
+
+                    mFollowersCount++;
+                }
+                mFollowers.setText(String.valueOf(mFollowersCount));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getFollowingCount() {
+        mFollowingCount = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child(getString(R.string.dbname_following))
+                .child(mUser.getUser_id());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found followers:" + singleSnapshot.getValue());
+
+                    mFollowingCount++;
+                }
+                mFollowing.setText(String.valueOf(mFollowingCount));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getPostsCount() {
+        mPostCount = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child(getString(R.string.dbname_user_photos))
+                .child(mUser.getUser_id());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found followers:" + singleSnapshot.getValue());
+
+                    mPostCount++;
+                }
+                mPosts.setText(String.valueOf(mPostCount));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 
     private void setFollowing() {
         Log.d(TAG, "setFollowing: updating UI for following this user");

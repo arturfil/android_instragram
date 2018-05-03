@@ -360,7 +360,6 @@ public class ViewProfileFragment extends Fragment {
         });
     }
 
-
     private void setFollowing() {
         Log.d(TAG, "setFollowing: updating UI for following this user");
         mFollow.setVisibility(View.GONE);

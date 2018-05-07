@@ -1,5 +1,6 @@
 package com.arturofilio.instagramklone.Home;
 
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import com.arturofilio.instagramklone.R;
 import com.arturofilio.instagramklone.Utils.BottomNavigationViewHelper;
 import com.arturofilio.instagramklone.Utils.SectionsPagerAdapter;
 import com.arturofilio.instagramklone.Utils.UniversalImageLoader;
+import com.arturofilio.instagramklone.Utils.ViewCommentsFragment;
+import com.arturofilio.instagramklone.models.Photo;
+import com.arturofilio.instagramklone.models.UserAccountSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
@@ -41,6 +45,21 @@ public class HomeActivity extends AppCompatActivity {
         initImageLoader();
         setupBottomNavigationView();
         setupViewPager();
+    }
+
+    public void onCommentThreadSelected(Photo photo, UserAccountSettings settings) {
+        Log.d(TAG, "onCommentThreadSelected: selected a comment thread");
+
+        ViewCommentsFragment fragment = new ViewCommentsFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(getString(R.string.bundle_photo), photo);
+        args.putParcelable(getString(R.string.bundle_user_account_settings), settings);
+        fragment.setArguments(args);
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(getString(R.string.view_comments_fragment));
+        transaction.commit();
     }
 
     private void initImageLoader() {

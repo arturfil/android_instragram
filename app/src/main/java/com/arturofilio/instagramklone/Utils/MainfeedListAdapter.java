@@ -34,6 +34,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -56,11 +57,12 @@ public class MainfeedListAdapter extends ArrayAdapter<Photo> {
     private DatabaseReference mReference;
     private String currentUsername = "";
 
-    public MainfeedListAdapter(@NonNull Context context, int resource, @NonNull Photo[] objects) {
+    public MainfeedListAdapter(@NonNull Context context, int resource, @NonNull ArrayList<Photo> objects) {
         super(context, resource, objects);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mLayoutResource = resource;
         this.mContext = context;
+        mReference = FirebaseDatabase.getInstance().getReference();
     }
 
     static class ViewHolder {
@@ -194,6 +196,29 @@ public class MainfeedListAdapter extends ArrayAdapter<Photo> {
                             //another thing?
                         }
                     });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        //get the user object
+
+        Query userQuery = mReference
+                .child(mContext.getString(R.string.dbname_users))
+                .orderByChild(mContext.getString(R.string.field_user_id))
+                .equalTo(getItem(position).getUser_id());
+        userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                    Log.d(TAG, "onDataChange: found user: " +
+                    singleSnapshot.getValue(User.class).getUsername());
+
+                    holder.user = singleSnapshot.getValue(User.class);
                 }
             }
 

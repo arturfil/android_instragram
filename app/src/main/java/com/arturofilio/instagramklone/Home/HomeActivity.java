@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import com.arturofilio.instagramklone.Login.LoginActivity;
 import com.arturofilio.instagramklone.R;
 import com.arturofilio.instagramklone.Utils.BottomNavigationViewHelper;
+import com.arturofilio.instagramklone.Utils.MainfeedListAdapter;
 import com.arturofilio.instagramklone.Utils.SectionsPagerAdapter;
 import com.arturofilio.instagramklone.Utils.UniversalImageLoader;
 import com.arturofilio.instagramklone.Utils.ViewCommentsFragment;
@@ -29,7 +30,17 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements MainfeedListAdapter.OnLoadMoreItemsListener{
+
+    @Override
+    public void onLoadMoreItems() {
+        Log.d(TAG, "onLoadMoreItems: display more photos");
+        HomeFragment fragment = (HomeFragment)getSupportFragmentManager()
+                .findFragmentByTag("android:switcher" + R.id.viewpager_container + ":" + mViewPager.getCurrentItem());
+        if(fragment != null) {
+            fragment.displayMorePhotos();
+        }
+    }
 
     private static final String TAG = "HomeActivity";
     private static final int ACTIVITY_NUM = 0;
@@ -190,5 +201,4 @@ public class HomeActivity extends AppCompatActivity {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
-
 }

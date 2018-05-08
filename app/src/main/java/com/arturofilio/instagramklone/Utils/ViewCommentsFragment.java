@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.arturofilio.instagramklone.Home.HomeActivity;
 import com.arturofilio.instagramklone.R;
 import com.arturofilio.instagramklone.models.Comment;
 import com.arturofilio.instagramklone.models.Photo;
@@ -113,7 +114,12 @@ public class ViewCommentsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: navigating back");
-                getActivity().getSupportFragmentManager().popBackStack();
+                if(getCallingActivityFromBundle().equals(R.string.home_activity)){
+                    getActivity().getSupportFragmentManager().popBackStack();
+                    ((HomeActivity)getActivity()).showLayout();
+                } else {
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
             }
         });
     }
@@ -162,13 +168,27 @@ public class ViewCommentsFragment extends Fragment {
      * retrieve the photo form the incoming bundle form profileActivity interface
      * @return
      */
-
     private Photo getPhotoFromBundle() {
         Log.d(TAG, "getPhotoFromBundle: arguments: " + getArguments());
 
         Bundle bundle = this.getArguments();
         if(bundle != null) {
             return bundle.getParcelable(getString(R.string.photo));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * retrieve the photo form the incoming bundle form profileActivity interface
+     * @return
+     */
+    private String getCallingActivityFromBundle() {
+        Log.d(TAG, "getPhotoFromBundle: arguments: " + getArguments());
+
+        Bundle bundle = this.getArguments();
+        if(bundle != null) {
+            return bundle.getString(getString(R.string.home_activity));
         } else {
             return null;
         }

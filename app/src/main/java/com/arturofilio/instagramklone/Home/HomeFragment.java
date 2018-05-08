@@ -72,6 +72,7 @@ public class HomeFragment extends Fragment {
 
                     mFollowing.add(singleSnapshot.child(getString(R.string.field_user_id)).getValue().toString());
                 }
+                mFollowing.add(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 //get the photos
                 getPhotos();
             }

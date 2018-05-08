@@ -115,6 +115,9 @@ public class MainfeedListAdapter extends ArrayAdapter<Photo> {
         //get the current users username (need for checking likes string)
         getCurrentUsername();
 
+        //set the caption
+        holder.caption.setText(getItem(position).getCaption());
+
         //get likes string
         getLikedStrings(holder);
 
@@ -447,8 +450,8 @@ public class MainfeedListAdapter extends ArrayAdapter<Photo> {
         }
     }
 
-    private void setupLikesString(final ViewHolder holder, String likesString) {
-        Log.d(TAG, "setupLikesString: likes string: " + holder.likesString);
+    private void setupLikesString(final ViewHolder holder, String likesString){
+        Log.d(TAG, "setupLikesString: likes string:" + holder.likesString);
 
         if(holder.likeByCurrentUser){
             Log.d(TAG, "setupLikesString: photo is liked by current user");
@@ -460,11 +463,11 @@ public class MainfeedListAdapter extends ArrayAdapter<Photo> {
                     return holder.detector.onTouchEvent(event);
                 }
             });
-        } else {
+        }else{
             Log.d(TAG, "setupLikesString: photo is not liked by current user");
             holder.heartWhite.setVisibility(View.VISIBLE);
             holder.heartRed.setVisibility(View.GONE);
-            holder.heartRed.setOnTouchListener(new View.OnTouchListener() {
+            holder.heartWhite.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     return holder.detector.onTouchEvent(event);
